@@ -5,6 +5,7 @@ use App\Models\Documento;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class DocumentosController extends Controller
 {
@@ -167,5 +168,21 @@ class DocumentosController extends Controller
 
         return response()->json(compact('El codigo es incorrecto'), 400);
         }
+    }
+
+    public function download_zip()
+    {
+        $usuario = auth()->user();
+
+        $zip = new ZipArchive();
+        $zip->open('ComprimidoINAPCET.zip', ZipArchive::CREATE);
+        $zip->addGlob("archivos/$usuario->name/*");
+        $zip->close();
+
+        // $headers = array(
+        //     'Content-Type' => 'application/octet-stream',
+        // );
+        
+        return response()->download($zip);
     }
 }

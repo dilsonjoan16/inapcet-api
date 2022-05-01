@@ -51,6 +51,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::post('documentos/crear', [DocumentosController::class, 'store']);
     Route::put('documentos/modificar/{id}', [DocumentosController::class, 'update']);
     Route::get('documentos/download/{file}', [DocumentosController::class, 'download']);
+    Route::get('documentos/download/zip', [DocumentosController::class, 'download_zip']);
     Route::put('documentos/desactivar/{id}', [DocumentosController::class, 'soft_delete']);
     Route::put('documentos/activar/{id}', [DocumentosController::class, 'restore']);
     Route::put('documentos/activar/masivo', [DocumentosController::class, 'restore_massive']);
