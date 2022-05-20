@@ -11,27 +11,62 @@ class DocumentosController extends Controller
 {
     public function index()
     {
-        $documento = Documento::where('state', 1)->with('pertenece_departamento')->get('id','name','state','departament_id');
+        $documento = Documento::where('state', 1)->with('pertenece_departamento', 'pertenece_proyectos','usuario_creador','usuario_modificador','usuario_eliminador','usuario_restaurador')->get(['id','name','state','created_at', 'updated_at', 'deleted_at', 'restored_at','departament_id', 'proyect_id', 'user_created','user_updated','user_deleted','user_restored']);
 
         return response()->json(compact('documento'), 200);
-    }
-    // FUNCION QUE SOLO TRAE REGISTROS ELIMINADOS TEMPORALMENTE
-    public function index_trashed()
-    {
-        $documento = Documento::where('state', 0)->with('pertenece_departamento')->get('id','name','state','departament_id');
 
-        return response()->json(compact('documento'), 200);
     }
 
-    public function show($file)
+    // FUNCION QUE SOLO TRAE REGISTROS DEL USUARIO
+    public function index_single()
     {
         $usuario = auth()->user();
 
-        // $documento = Documento::find($id);
+        $documento = Documento::where('user_created', $usuario->id)->where('state', 1)->with('pertenece_departamento', 'pertenece_proyectos')->get(['id','name','state','created_at','departament_id', 'proyect_id']);
 
-        // return response()->json(compact('documento'), 200);
+        return response()->json(compact('documento'), 200);
+    }
 
-        return Storage::response("archivos/$usuario->name/$file");
+    //FUNCION QUE SOLO TRAE REGISTROS CON EL DEPARTAMENTO EN COMUN
+    public function index_departament()
+    {
+        $usuario = auth()->user();
+        if ($usuario->rol_id == 2) {
+            $documento = Documento::where('departament_id', $usuario->departament_id)->where('state', 1)->with('pertenece_proyectos','usuario_creador')->get(['id','name','state','created_at','proyect_id', 'user_created']);
+
+            return response()->json(compact('documento'), 200);
+        }
+
+        $documento = Documento::where('departament_id', $usuario->departament_id)->where('state', 1)->with('pertenece_proyectos')->get(['id','name','state','proyect_id']);
+
+        return response()->json(compact('documento'), 200);
+    }
+
+    // FUNCION QUE SOLO TRAE REGISTROS ELIMINADOS TEMPORALMENTE
+    public function index_trashed()
+    {
+        $usuario = auth()->user();
+
+        if ($usuario->rol_id == 1) {
+            $documento = Documento::where('state', 0)->with('pertenece_departamento','pertenece_proyectos','usuario_eliminador')->get(['id','name','deleted_at','departament_id', 'proyect_id', 'user_deleted']);
+
+            return response()->json(compact('documento'), 200);
+        }
+
+        $documento = Documento::where('state', 0)->where('departament_id', $usuario->departament_id)->with('pertenece_proyectos','usuario_eliminador')->get(['id','name','deleted_at', 'proyect_id', 'user_deleted']);
+
+        return response()->json(compact('documento'), 200);
+    }
+
+    public function show(/*$file*/$id)
+    {
+        $usuario = auth()->user();
+
+        $documento = Documento::with('pertenece_departamento','pertenece_proyectos')->find($id);
+
+        return response()->json(compact('documento'), 200);
+
+        // return Storage::response("archivos/$usuario->name/$file");
     }
 
     public function store(Request $request)
@@ -42,7 +77,6 @@ class DocumentosController extends Controller
             'archivo' => 'required|file',
             'state' => 'required|integer',
             'departament_id' => 'required|integer',
-            'proyect_id' => 'integer'
         ]);
 
         $file = time().'-'.$request->file('archivo')->getClientOriginalName();
@@ -64,14 +98,15 @@ class DocumentosController extends Controller
         $usuario = auth()->user();
 
         $request->validate([
-            'archivo' => 'file',
+            // 'archivo' => 'file',
             'state' => 'integer',
             'departament_id' => 'integer',
-            'proyect_id' => 'integer'
         ]);
 
+        $file = Documento::find($id);
+
+
         if ($request->file('archivo') != null || $request->hasFile('archivo')) {
-            $file = Documento::find($id);
 
             Storage::delete("archivos/$usuario->name/$file->name");
 
@@ -87,9 +122,21 @@ class DocumentosController extends Controller
             $file->update();
 
             // $file->delete();
+            return response()->json(compact('file'), 201);
+        }
+        if ($request->file('archivo') == null) {
+
+            $file->name = $file->name;
+            $file->state = $request->get('state') == null ? $file->state : $request->get('state');
+            $file->departament_id = $request->get('departament_id') == null ? $file->departament_id : $request->get('departament_id');
+            $file->proyect_id = $request->get('proyect_id') == null ? $file->proyect_id : $request->get('proyect_id');
+            $file->user_updated = $usuario->id;
+            $file->update();
+
+            // $file->delete();
+            return response()->json(compact('file'), 201);
         }
 
-        return response()->json(compact('file'), 201);
     }
 
     // FUNCION PARA DESCARGAR EL ARCHIVO
@@ -107,7 +154,7 @@ class DocumentosController extends Controller
 
         $documento = Documento::find($id);
         $documento->user_deleted = $usuario->id;
-        $documento->deleted_at = time();
+        $documento->deleted_at = date_create();
         $documento->state = 0;
         $documento->update();
 
@@ -120,7 +167,7 @@ class DocumentosController extends Controller
 
         $documento = Documento::find($id);
         $documento->user_restored = $usuario->id;
-        $documento->restored_at = time();
+        $documento->restored_at = date_create();
         $documento->state = 1;
         $documento->update();
 
@@ -135,7 +182,7 @@ class DocumentosController extends Controller
 
         foreach ($documento as $d) {
             $d->user_restored = $usuario->id;
-            $d->restored_at = time();
+            $d->restored_at = date_create();
             $d->state = 1;
             $d->update();
         }
@@ -156,7 +203,7 @@ class DocumentosController extends Controller
 
             $documento->delete();
 
-        return response()->json(compact('Eliminacion completa'), 200);
+        return response()->json('Eliminacion Completa');
         }
 
         if ($request->get('code') == null) {
@@ -182,7 +229,7 @@ class DocumentosController extends Controller
         // $headers = array(
         //     'Content-Type' => 'application/octet-stream',
         // );
-        
+
         return response()->download($zip);
     }
 }

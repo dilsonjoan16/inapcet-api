@@ -9,14 +9,14 @@ class DepartamentoController extends Controller
 {
     public function index()
     {
-        $departamento = Departamento::where('state', 1)->get('id','name', 'state');
+        $departamento = Departamento::where('state', 1)->get(['id','name', 'state']);
 
         return response()->json(compact('departamento'), 200);
     }
     // FUNCION QUE SOLO TRAE REGISTROS ELIMINADOS TEMPORALMENTE
     public function index_trashed()
     {
-        $departamento = Departamento::where('state', 0)->get('id','name', 'state');
+        $departamento = Departamento::where('state', 0)->get(['id','name', 'state']);
 
         return response()->json(compact('departamento'), 200);
     }

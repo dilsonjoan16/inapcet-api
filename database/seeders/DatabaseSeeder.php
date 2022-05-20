@@ -68,5 +68,17 @@ class DatabaseSeeder extends Seeder
             "name" => "Invitado",
             "state" => 1,
         ]);
+        Role::create([
+            "name" => "Gerente",
+            "state" => 1,
+        ]);
+        Role::create([
+            "name" => "Coordinador",
+            "state" => 1,
+        ]);
+        Role::create([
+            "name" => "Auditor",
+            "state" => 1,
+        ]);
     }
 }

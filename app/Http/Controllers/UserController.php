@@ -6,7 +6,8 @@ namespace App\Http\Controllers;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Hash;
     use Illuminate\Support\Facades\Validator;
-    use JWTAuth;
+    // use JWTAuth;
+    use Tymon\JWTAuth\Facades\JWTAuth;
     use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UserController extends Controller
@@ -62,7 +63,7 @@ class UserController extends Controller
 
         return response()->json(compact('usuario'), 200);
     }
-    
+
     // FUNCION PARA CREAR USUARIOS SIN ASIGNACION
     public function register(Request $request)
     {
@@ -123,7 +124,7 @@ class UserController extends Controller
         }
 
         // FUNCION PARA CREAR EL USUARIO MAESTRO
-        public function master_store(Request $request)
+        public function register_pro(Request $request)
         {
                 $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',

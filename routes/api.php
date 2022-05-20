@@ -19,15 +19,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::post('usuarios/register', [UserController::class, 'register']);
 Route::post('usuarios/login', [UserController::class, 'authenticate']);
 
 // RUTA PARA CREAR EL USUARIO MAESTRO
-Route::post('usuarios/master/register', [UserController::class, 'master_store']);
+// Route::post('usuarios/master/register', [UserController::class, 'master_store']);
+
+Route::post('usuarios/register/professional', [UserController::class, 'register_pro']);
 
 Route::group(['middleware' => ['jwt.verify']], function() {
     /*AÑADE AQUI LAS RUTAS QUE QUIERAS PROTEGER CON JWT*/
@@ -46,16 +44,19 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
     // RUTAS DE LOS DOCUMENTOS
     Route::get('documentos/activos', [DocumentosController::class, 'index']);
+    Route::get('documentos/activos/departamentos', [DocumentosController::class, 'index_departament']);
+    Route::get('documentos/activos/usuarios', [DocumentosController::class, 'index_single']);
     Route::get('documentos/inactivos', [DocumentosController::class, 'index_trashed']);
-    Route::get('documentos/ver/{file}', [DocumentosController::class, 'show']);
+    Route::get('documentos/ver/{id}', [DocumentosController::class, 'show']);
     Route::post('documentos/crear', [DocumentosController::class, 'store']);
-    Route::put('documentos/modificar/{id}', [DocumentosController::class, 'update']);
+    Route::post('documentos/modificar/{id}', [DocumentosController::class, 'update']);
     Route::get('documentos/download/{file}', [DocumentosController::class, 'download']);
     Route::get('documentos/download/zip', [DocumentosController::class, 'download_zip']);
-    Route::put('documentos/desactivar/{id}', [DocumentosController::class, 'soft_delete']);
-    Route::put('documentos/activar/{id}', [DocumentosController::class, 'restore']);
+    Route::get('documentos/desactivar/{id}', [DocumentosController::class, 'soft_delete']);
+    Route::get('documentos/activar/{id}', [DocumentosController::class, 'restore']);
     Route::put('documentos/activar/masivo', [DocumentosController::class, 'restore_massive']);
-    Route::delete('documentos/eliminado/forzado/{id}', [DocumentosController::class, 'force_delete']);
+    // Route::post('documentos/eliminado/forzado/{id}', [DocumentosController::class, 'force_delete']);
+    Route::delete('documentos/eliminado/permanente/{id}', [DocumentosController::class, 'force_delete']);
 
     // RUTAS DE LOS ROLES
     Route::get('roles/activos', [RoleController::class, 'index']);
