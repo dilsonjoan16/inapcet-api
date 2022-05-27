@@ -31,7 +31,7 @@ class DocumentosController extends Controller
     public function index_departament()
     {
         $usuario = auth()->user();
-        if ($usuario->rol_id == 2) {
+        if ($usuario->rol_id == 2 || $usuario->rol_id == 1) {
             $documento = Documento::where('departament_id', $usuario->departament_id)->where('state', 1)->with('pertenece_proyectos','usuario_creador')->get(['id','name','state','created_at','proyect_id', 'user_created']);
 
             return response()->json(compact('documento'), 200);
@@ -73,10 +73,31 @@ class DocumentosController extends Controller
     {
         $usuario = auth()->user();
 
+        if ($usuario->rol_id == 1) {
+
+            $request->validate([
+                'archivo' => 'required|file',
+                'state' => 'required|integer',
+                'departament_id' => 'required|integer',
+            ]);
+
+            $file = time().'-'.$request->file('archivo')->getClientOriginalName();
+            $request->file('archivo')->storeAs("archivos/$usuario->name/", $file);
+
+            $saveFile = new Documento;
+            $saveFile->name = $file;
+            $saveFile->state = $request->get('state');
+            $saveFile->departament_id = $request->get('departament_id');
+            $saveFile->proyect_id = $request->get('proyect_id') == null ? null : $request->get('proyect_id');
+            $saveFile->user_created = $usuario->id;
+            $saveFile->save();
+
+            return response()->json(compact('saveFile'), 201);
+        }
+
         $request->validate([
             'archivo' => 'required|file',
             'state' => 'required|integer',
-            'departament_id' => 'required|integer',
         ]);
 
         $file = time().'-'.$request->file('archivo')->getClientOriginalName();
@@ -85,22 +106,65 @@ class DocumentosController extends Controller
         $saveFile = new Documento;
         $saveFile->name = $file;
         $saveFile->state = $request->get('state');
-        $saveFile->departament_id = $request->get('departament_id');
+        $saveFile->departament_id = $request->get('departament_id') == null ? $usuario->departament_id : $usuario->departament_id;
         $saveFile->proyect_id = $request->get('proyect_id') == null ? null : $request->get('proyect_id');
         $saveFile->user_created = $usuario->id;
         $saveFile->save();
 
         return response()->json(compact('saveFile'), 201);
+
     }
 
     public function update(Request $request, $id)
     {
         $usuario = auth()->user();
 
+        if ($usuario->rol_id == 1) {
+
+            $request->validate([
+                // 'archivo' => 'file',
+                'state' => 'integer',
+                'departament_id' => 'integer',
+            ]);
+
+            $file = Documento::find($id);
+
+
+            if ($request->file('archivo') != null || $request->hasFile('archivo')) {
+
+                Storage::delete("archivos/$usuario->name/$file->name");
+
+                $file_name = time().'-'.$request->file('archivo')->getClientOriginalName();
+                $request->file('archivo')->storeAs("archivos/$usuario->name/", $file_name);
+
+                // $saveFile = new Documento;
+                $file->name = $file_name;
+                $file->state = $request->get('state') == null ? $file->state : $request->get('state');
+                $file->departament_id = $request->get('departament_id') == null ? $file->departament_id : $request->get('departament_id');
+                $file->proyect_id = $request->get('proyect_id') == null ? $file->proyect_id : $request->get('proyect_id');
+                $file->user_updated = $usuario->id;
+                $file->update();
+
+                // $file->delete();
+                return response()->json(compact('file'), 201);
+            }
+            if ($request->file('archivo') == null) {
+
+                $file->name = $file->name;
+                $file->state = $request->get('state') == null ? $file->state : $request->get('state');
+                $file->departament_id = $request->get('departament_id') == null ? $file->departament_id : $request->get('departament_id');
+                $file->proyect_id = $request->get('proyect_id') == null ? $file->proyect_id : $request->get('proyect_id');
+                $file->user_updated = $usuario->id;
+                $file->update();
+
+                // $file->delete();
+                return response()->json(compact('file'), 201);
+            }
+        }
+
         $request->validate([
             // 'archivo' => 'file',
             'state' => 'integer',
-            'departament_id' => 'integer',
         ]);
 
         $file = Documento::find($id);
@@ -116,7 +180,7 @@ class DocumentosController extends Controller
             // $saveFile = new Documento;
             $file->name = $file_name;
             $file->state = $request->get('state') == null ? $file->state : $request->get('state');
-            $file->departament_id = $request->get('departament_id') == null ? $file->departament_id : $request->get('departament_id');
+            $file->departament_id = $request->get('departament_id') == null ? $file->departament_id : $file->departament_id;
             $file->proyect_id = $request->get('proyect_id') == null ? $file->proyect_id : $request->get('proyect_id');
             $file->user_updated = $usuario->id;
             $file->update();
@@ -128,7 +192,7 @@ class DocumentosController extends Controller
 
             $file->name = $file->name;
             $file->state = $request->get('state') == null ? $file->state : $request->get('state');
-            $file->departament_id = $request->get('departament_id') == null ? $file->departament_id : $request->get('departament_id');
+            $file->departament_id = $request->get('departament_id') == null ? $file->departament_id : $file->departament_id;
             $file->proyect_id = $request->get('proyect_id') == null ? $file->proyect_id : $request->get('proyect_id');
             $file->user_updated = $usuario->id;
             $file->update();
@@ -136,7 +200,6 @@ class DocumentosController extends Controller
             // $file->delete();
             return response()->json(compact('file'), 201);
         }
-
     }
 
     // FUNCION PARA DESCARGAR EL ARCHIVO
@@ -189,6 +252,22 @@ class DocumentosController extends Controller
 
         return response()->json(compact('Restauracion completa'), 200);
     }
+    // FUNCION PARA RESTAURAR ELIMINADOS TEMPORALES MASIVAMENTE EN DEPARTAMENTOS
+    public function restore_massive_departament()
+    {
+        $usuario = auth()->user();
+
+        $documento = Documento::where('state', 0)->where('departament_id', $usuario->departament_id)->get();
+
+        foreach ($documento as $d) {
+            $d->user_restored = $usuario->id;
+            $d->restored_at = date_create();
+            $d->state = 1;
+            $d->update();
+        }
+
+        return response()->json(compact('Restauracion completa'), 200);
+    }
     // FUNCION PARA ELIMINAR PERMANENTEMENTE ALGUN REGISTRO
     public function force_delete(Request $request,$id)
     {
@@ -221,11 +300,15 @@ class DocumentosController extends Controller
     {
         $usuario = auth()->user();
 
+        $document = Documento::where('user_created', $usuario->id)->get('name');
+
         $zip = new ZipArchive();
         $zip->open('ComprimidoINAPCET.zip', ZipArchive::CREATE);
-        $zip->addGlob("archivos/$usuario->name/*");
+        foreach ($document as $d) {
+            $zip->addFile("archivos/$usuario->name/$d", "$d");
+        }
+        // $zip->addGlob("archivos/$usuario->name/*");
         $zip->close();
-
         // $headers = array(
         //     'Content-Type' => 'application/octet-stream',
         // );

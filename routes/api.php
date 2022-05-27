@@ -36,9 +36,9 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('usuarios/inactivos', [UserController::class, 'index_trashed']);
     Route::get('usuarios/ver/{id}', [UserController::class, 'show']);
     Route::put('usuarios/modificar/{id}', [UserController::class, 'update']);
-    Route::put('usuarios/desactivar/{id}', [UserController::class, 'soft_delete']);
-    Route::put('usuarios/activar/{id}', [UserController::class, 'restore']);
-    Route::put('usuarios/activar/masivo', [UserController::class, 'restore_massive']);
+    Route::get('usuarios/desactivar/{id}', [UserController::class, 'soft_delete']);
+    Route::get('usuarios/activar/{id}', [UserController::class, 'restore']);
+    Route::post('usuarios/activar/masivo', [UserController::class, 'restore_massive']);
     Route::delete('usuarios/eliminado/forzado/{id}', [UserController::class, 'force_delete']);
     Route::get('usuarios/logout', [UserController::class, 'logout']);
 
@@ -55,8 +55,9 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('documentos/desactivar/{id}', [DocumentosController::class, 'soft_delete']);
     Route::get('documentos/activar/{id}', [DocumentosController::class, 'restore']);
     Route::put('documentos/activar/masivo', [DocumentosController::class, 'restore_massive']);
+    Route::get('documentos/activar/masivo/departamento', [DocumentosController::class, 'restore_massive_departament']);
     // Route::post('documentos/eliminado/forzado/{id}', [DocumentosController::class, 'force_delete']);
-    Route::delete('documentos/eliminado/permanente/{id}', [DocumentosController::class, 'force_delete']);
+    Route::put('documentos/eliminado/permanente/{id}', [DocumentosController::class, 'force_delete']);
 
     // RUTAS DE LOS ROLES
     Route::get('roles/activos', [RoleController::class, 'index']);
@@ -74,11 +75,11 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('departamentos/inactivos', [DepartamentoController::class, 'index_trashed']);
     Route::get('departamentos/ver/{id}', [DepartamentoController::class, 'show']);
     Route::post('departamentos/crear', [DepartamentoController::class, 'store']);
-    Route::put('departamentos/modificar/{id}', [DepartamentoController::class, 'update']);
-    Route::put('departamentos/desactivar/{id}', [DepartamentoController::class, 'soft_delete']);
-    Route::put('departamentos/activar/{id}', [DepartamentoController::class, 'restore']);
+    Route::post('departamentos/modificar/{id}', [DepartamentoController::class, 'update']);
+    Route::get('departamentos/desactivar/{id}', [DepartamentoController::class, 'soft_delete']);
+    Route::get('departamentos/activar/{id}', [DepartamentoController::class, 'restore']);
     Route::put('departamentos/activar/masivo', [DepartamentoController::class, 'restore_massive']);
-    Route::delete('departamentos/eliminado/forzado/{id}', [DepartamentoControler::class, 'force_delete']);
+    Route::put('departamentos/eliminado/forzado/{id}', [DepartamentoControler::class, 'force_delete']);
 
     // RUTAS DE LOS PROYECTOS
     Route::get('proyectos/activos', [ProyectosController::class, 'index']);

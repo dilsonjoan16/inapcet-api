@@ -9,14 +9,14 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $role = Role::where('state', 1)->get('id','name','state');
+        $role = Role::where('state', 1)->get(['id','name','state']);
 
         return response()->json(compact('role'), 200);
     }
     // FUNCION QUE SOLO TRAE REGISTROS ELIMINADOS TEMPORALMENTE
     public function index_trashed()
     {
-        $role = Role::where('state', 0)->get('id','name','state');
+        $role = Role::where('state', 0)->get(['id','name','state']);
 
         return response()->json(compact('role'), 200);
     }

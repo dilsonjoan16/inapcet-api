@@ -45,16 +45,43 @@ class UserController extends Controller
 
     public function index()
     {
-        $usuario = User::where('state', 1)->with('pertenece_roles','pertecene_departamento')->get('id','name','rol_id','departament_id', 'state');
+        $usuarioAc = auth()->user();
 
-        return response()->json(compact('usuario'), 200);
+        if ($usuarioAc->rol_id == 1){
+
+            $usuario = User::where('state', 1)->with('pertenece_roles','pertecene_departamento')->get(['id','name','rol_id','departament_id', 'state', 'created_at']);
+
+            return response()->json(compact('usuario'), 200);
+        }
+
+        elseif ($usuarioAc->rol_id == 2) {
+
+            $usuario = User::where('state', 1)->where('departament_id', $usuarioAc->departament_id)->with('pertenece_roles')->get(['id','name','rol_id', 'state', 'created_at']);
+
+            return response()->json(compact('usuario'), 200);
+
+        }
+
     }
     // FUNCION QUE SOLO TRAE REGISTROS ELIMINADOS TEMPORALMENTE
     public function index_trashed()
     {
-        $usuario = User::where('state', 0)->with('pertenece_roles','pertecene_departamento')->get('id','name','rol_id','departament_id', 'state');
+        $usuarioAc = auth()->user();
 
-        return response()->json(compact('usuario'), 200);
+        if ($usuarioAc->rol_id == 1){
+
+            $usuario = User::where('state', 0)->with('pertenece_roles','pertecene_departamento')->get(['id','name','rol_id','departament_id', 'state', 'deleted_at']);
+
+            return response()->json(compact('usuario'), 200);
+        }
+
+        elseif ($usuarioAc->rol_id == 2){
+
+            $usuario = User::where('state', 0)->where('departament_id', $usuarioAc->departament_id)->with('pertenece_roles')->get(['id','name','rol_id', 'state', 'deleted_at']);
+
+            return response()->json(compact('usuario'), 200);
+        }
+
     }
 
     public function show($id)
@@ -79,7 +106,7 @@ class UserController extends Controller
         $user->email = $request->get('email');
         $user->password = Hash::make($request->get('password'));
         $user->code = Hash::make($request->get('code'));
-        $user->rol_id = 2;
+        $user->rol_id = 3;
         $user->state = 0;
         $user->save();
 

@@ -9,14 +9,14 @@ class DepartamentoController extends Controller
 {
     public function index()
     {
-        $departamento = Departamento::where('state', 1)->get(['id','name', 'state']);
+        $departamento = Departamento::where('state', 1)->get(['id','name', 'state', 'created_at']);
 
         return response()->json(compact('departamento'), 200);
     }
     // FUNCION QUE SOLO TRAE REGISTROS ELIMINADOS TEMPORALMENTE
     public function index_trashed()
     {
-        $departamento = Departamento::where('state', 0)->get(['id','name', 'state']);
+        $departamento = Departamento::where('state', 0)->get(['id','name', 'state', 'deleted_at']);
 
         return response()->json(compact('departamento'), 200);
     }
@@ -70,7 +70,7 @@ class DepartamentoController extends Controller
 
         $departamento = Departamento::find($id);
         $departamento->user_deleted = $usuario->id;
-        $departamento->deleted_at = time();
+        $departamento->deleted_at = date_create();
         $departamento->state = 0;
         $departamento->update();
 
@@ -83,7 +83,7 @@ class DepartamentoController extends Controller
 
         $departamento = Departamento::find($id);
         $departamento->user_restored = $usuario->id;
-        $departamento->restored_at = time();
+        $departamento->restored_at = date_create();
         $departamento->state = 1;
         $departamento->update();
 
@@ -98,7 +98,7 @@ class DepartamentoController extends Controller
 
         foreach ($departamento as $d) {
             $d->user_restored = $usuario->id;
-            $d->restored_at = time();
+            $d->restored_at = date_create();
             $d->state = 1;
             $d->update();
         }
