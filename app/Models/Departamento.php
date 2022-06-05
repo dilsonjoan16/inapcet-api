@@ -22,12 +22,12 @@ class Departamento extends Model
 
     public function tiene_usuarios()
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'id');
     }
 
     public function tiene_documentos()
     {
-        return $this->hasMany(Documento::class);
+        return $this->hasMany(Documento::class, 'id');
     }
 
     public function usuario_creador()

@@ -24,14 +24,19 @@ class Proyecto extends Model
 
     // RELACIONES EN MODELO
 
+    // public function tiene_usuarios()
+    // {
+    //     return $this->belongsToMany(UserPivoteProyecto::class, 'id', 'proyect_id');   //TABLA PIVOTE
+    // }
+
     public function tiene_usuarios()
     {
-        return $this->hasMany(UserPivoteProyecto::class);   //TABLA PIVOTE
+        return $this->belongsToMany(User::class, 'user_pivote_proyectos', 'proyect_id', 'user_id');   //TABLA PIVOTE
     }
 
     public function tiene_multimedia()
     {
-        return $this->hasMany(Documento::class);    //IMAGENES Y VIDEOS DE LOS PROYECTOS
+        return $this->hasMany(Documento::class, 'proyect_id');    //IMAGENES Y VIDEOS DE LOS PROYECTOS
     }
 
     public function usuario_creador()

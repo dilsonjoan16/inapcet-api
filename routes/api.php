@@ -25,6 +25,7 @@ Route::post('usuarios/login', [UserController::class, 'authenticate']);
 // RUTA PARA CREAR EL USUARIO MAESTRO
 // Route::post('usuarios/master/register', [UserController::class, 'master_store']);
 
+        // FUNCION PARA CREAR EL USUARIO MAESTRO
 Route::post('usuarios/register/professional', [UserController::class, 'register_pro']);
 
 Route::group(['middleware' => ['jwt.verify']], function() {
@@ -39,8 +40,10 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('usuarios/desactivar/{id}', [UserController::class, 'soft_delete']);
     Route::get('usuarios/activar/{id}', [UserController::class, 'restore']);
     Route::post('usuarios/activar/masivo', [UserController::class, 'restore_massive']);
-    Route::delete('usuarios/eliminado/forzado/{id}', [UserController::class, 'force_delete']);
+    Route::post('usuarios/eliminado/forzado/{id}', [UserController::class, 'force_delete']);
     Route::get('usuarios/logout', [UserController::class, 'logout']);
+    Route::get('usuarios/auditoria', [UserController::class, 'index_audit']);
+    Route::get('usuarios/auditoria/individual/{id}', [UserController::class, 'show_audit']);
 
     // RUTAS DE LOS DOCUMENTOS
     Route::get('documentos/activos', [DocumentosController::class, 'index']);
@@ -57,7 +60,8 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::put('documentos/activar/masivo', [DocumentosController::class, 'restore_massive']);
     Route::get('documentos/activar/masivo/departamento', [DocumentosController::class, 'restore_massive_departament']);
     // Route::post('documentos/eliminado/forzado/{id}', [DocumentosController::class, 'force_delete']);
-    Route::put('documentos/eliminado/permanente/{id}', [DocumentosController::class, 'force_delete']);
+    Route::post('documentos/eliminado/permanente/{id}', [DocumentosController::class, 'force_delete']);
+    Route::get('documentos/auditoria', [DocumentosController::class, 'index_audit']);
 
     // RUTAS DE LOS ROLES
     Route::get('roles/activos', [RoleController::class, 'index']);
@@ -79,16 +83,19 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('departamentos/desactivar/{id}', [DepartamentoController::class, 'soft_delete']);
     Route::get('departamentos/activar/{id}', [DepartamentoController::class, 'restore']);
     Route::put('departamentos/activar/masivo', [DepartamentoController::class, 'restore_massive']);
-    Route::put('departamentos/eliminado/forzado/{id}', [DepartamentoControler::class, 'force_delete']);
+    Route::post('departamentos/eliminado/forzado/{id}', [DepartamentoControler::class, 'force_delete']);
+    Route::get('departamentos/auditoria', [DepartamentoController::class, 'index_audit']);
 
     // RUTAS DE LOS PROYECTOS
     Route::get('proyectos/activos', [ProyectosController::class, 'index']);
     Route::get('proyectos/inactivos', [ProyectosController::class, 'index_trashed']);
     Route::get('proyectos/ver/{id}', [ProyectosController::class, 'show']);
     Route::post('proyectos/crear', [ProyectosController::class, 'store']);
-    Route::put('proyectos/modificar/{id}/{state}', [ProyectosController::class, 'update']);
-    Route::put('proyectos/desactivar/{id}', [ProyectosController::class, 'soft_delete']);
-    Route::put('proyectos/activar/{id}', [ProyectosController::class, 'restore']);
+    Route::post('proyectos/modificar/{id}/{state}', [ProyectosController::class, 'update']);
+    Route::get('proyectos/desactivar/{id}', [ProyectosController::class, 'soft_delete']);
+    Route::get('proyectos/activar/{id}', [ProyectosController::class, 'restore']);
     Route::put('proyectos/activar/masivo', [ProyectosController::class, 'restore_massive']);
-    Route::delete('proyectos/eliminado/forzado/{id}', [ProyectosController::class, 'force_delete']);
+    Route::post('proyectos/eliminado/forzado/{id}', [ProyectosController::class, 'force_delete']);
+    Route::get('proyectos/auditoria', [ProyectosController::class, 'index_audit']);
+
 });

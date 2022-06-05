@@ -6,8 +6,8 @@ namespace App\Http\Controllers;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Hash;
     use Illuminate\Support\Facades\Validator;
-    // use JWTAuth;
-    use Tymon\JWTAuth\Facades\JWTAuth;
+    use JWTAuth;
+    // use Tymon\JWTAuth\Facades\JWTAuth;
     use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UserController extends Controller
@@ -61,8 +61,16 @@ class UserController extends Controller
             return response()->json(compact('usuario'), 200);
 
         }
-
     }
+
+    // FUNCION QUE SOLO SE USA EN AUDITORIA (ROL AUDITOR)
+    public function index_audit()
+    {
+        $usuario = User::get(['id','name', 'state', 'created_at', 'user_updated','user_deleted','user_restored']);
+
+        return response()->json(compact('usuario'), 200);
+    }
+
     // FUNCION QUE SOLO TRAE REGISTROS ELIMINADOS TEMPORALMENTE
     public function index_trashed()
     {
@@ -91,6 +99,12 @@ class UserController extends Controller
         return response()->json(compact('usuario'), 200);
     }
 
+    public function show_audit($id)
+    {
+        $usuario = User::where('id', $id)->with('pertenece_roles','pertecene_departamento','tiene_proyectos','tiene_usuarios','tiene_documentos','usuario_creador','usuario_modificador','usuario_eliminador','usuario_restaurador')->get(['name','email','password','code','rol_id','departament_id','state','user_created','user_updated','user_deleted','user_restored','created_at', 'updated_at', 'deleted_at', 'restored_at']);
+
+        return response()->json(compact('usuario'), 200);
+    }
     // FUNCION PARA CREAR USUARIOS SIN ASIGNACION
     public function register(Request $request)
     {
@@ -184,15 +198,36 @@ class UserController extends Controller
     {
         $usuario = auth()->user();
 
-        $request->validate([
-            'name' => 'string|max:255',
-            'email' => 'email|max:255|unique:users',
-            'password' => 'string|min:8|max:12|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|regex:/[@$!%*#?&]/',
-            'code' => 'integer|digits:6',
-            'rol_id' => 'integer',
-            'departament_id' => 'integer',
-            'state' => 'integer',
-        ]);
+        if ($request->get('email') !== null) {
+            $request->validate(['email' => 'email|max:255|unique:users']);
+        }
+        if ($request->get('name') !== null) {
+            $request->validate(['name' => 'string|max:255']);
+        }
+        if ($request->get('password') !== null) {
+            $request->validate(['password' => 'string|min:8|max:12|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|regex:/[@$!%*#?&]/']);
+        }
+        if ($request->get('code') !== null) {
+            $request->validate(['code' => 'integer|digits:6']);
+        }
+        if ($request->get('rol_id') !== null) {
+            $request->validate(['rol_id' => 'integer']);
+        }
+        if ($request->get('departament_id') !== null) {
+            $request->validate(['departament_id' => 'integer']);
+        }
+        if ($request->get('state') !== null) {
+            $request->validate(['state' => 'integer']);
+        }
+        // $request->validate([
+        //     'name' => 'string|max:255',
+        //     'email' => 'email|max:255|unique:users',
+        //     'password' => 'string|min:8|max:12|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|regex:/[@$!%*#?&]/',
+        //     'code' => 'integer|digits:6',
+        //     'rol_id' => 'integer',
+        //     'departament_id' => 'integer',
+        //     'state' => 'integer',
+        // ]);
 
         $user = User::find($id);
         $user->name = $request->get('name') == null ? $user->name : $request->get('name');
@@ -215,7 +250,7 @@ class UserController extends Controller
 
         $user = User::find($id);
         $user->user_deleted = $usuario->id;
-        $user->deleted_at = time();
+        $user->deleted_at = date_create();
         $user->state = 0;
         $user->update();
 
@@ -228,7 +263,7 @@ class UserController extends Controller
 
         $user = User::find($id);
         $user->user_restored = $usuario->id;
-        $user->restored_at = time();
+        $user->restored_at = date_create();
         $user->state = 1;
         $user->update();
 
@@ -243,7 +278,7 @@ class UserController extends Controller
 
         foreach ($user as $u) {
             $u->user_restored = $usuario->id;
-            $u->restored_at = time();
+            $u->restored_at = date_create();
             $u->state = 1;
             $u->update();
         }
@@ -255,21 +290,22 @@ class UserController extends Controller
     {
         $usuario = auth()->user();
 
-        if ($request->get('code') !== null && $request->get('code') == $usuario->code) {
-            $user = User::find($id);
-            $user->delete();
+        if ($request->get('code') !== null) {
+            if (Hash::check($request->get('code'), $usuario->code)) {
 
-        return response()->json(compact('Eliminacion completa'), 200);
+                $user = User::find($id);
+                $user->delete();
+
+            return response()->json(compact('Eliminacion completa'), 200);
+            }else{
+
+                return response()->json(compact('El codigo es incorrecto'), 400);
+            }
         }
 
         if ($request->get('code') == null) {
 
         return response()->json(compact('Necesita ingresar el codigo'), 400);
-        }
-
-        if ($request->get('code') !== $usuario->code) {
-
-        return response()->json(compact('El codigo es incorrecto'), 400);
         }
     }
 

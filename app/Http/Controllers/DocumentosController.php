@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Documento;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
@@ -15,6 +16,14 @@ class DocumentosController extends Controller
 
         return response()->json(compact('documento'), 200);
 
+    }
+
+    // FUNCION QUE SOLO SE USA EN EL APARTADO AUDITORIA (ROL - AUDITOR)
+    public function index_audit()
+    {
+        $documento = Documento::get(['id', 'name', 'state', 'created_at', 'updated_at', 'deleted_at', 'restored_at']);
+
+        return response()->json(compact('documento'), 200);
     }
 
     // FUNCION QUE SOLO TRAE REGISTROS DEL USUARIO
@@ -62,7 +71,7 @@ class DocumentosController extends Controller
     {
         $usuario = auth()->user();
 
-        $documento = Documento::with('pertenece_departamento','pertenece_proyectos')->find($id);
+        $documento = Documento::where('id', $id)->with('pertenece_departamento','pertenece_proyectos', 'usuario_creador','usuario_modificador','usuario_eliminador','usuario_restaurador')->get(['id','name','state','departament_id','proyect_id','user_created','user_updated','user_deleted','user_restored', 'created_at', 'updated_at', 'deleted_at', 'restored_at']);
 
         return response()->json(compact('documento'), 200);
 
@@ -273,26 +282,28 @@ class DocumentosController extends Controller
     {
         $usuario = auth()->user();
 
-        if ($request->get('code') !== null && $request->get('code') == $usuario->code) {
-            $documento = Documento::find($id);
+        if ($request->get('code') !== null) {
+            if (Hash::check($request->get('code'), $usuario->code)) {
 
-            $busqueda = User::where('id', $documento->user_created)->pluck('name');
+                $documento = Documento::find($id);
 
-            Storage::delete("archivos/$busqueda/$documento->name");
+                $busqueda = User::where('id', $documento->user_created)->pluck('name');
 
-            $documento->delete();
+                Storage::delete("archivos/$busqueda/$documento->name");
 
-        return response()->json('Eliminacion Completa');
+                $documento->delete();
+
+            return response()->json('Eliminacion Completa');
+            }
+            else{
+                return response()->json(compact('El codigo es incorrecto'), 400);
+            }
+
         }
 
         if ($request->get('code') == null) {
 
         return response()->json(compact('Necesita ingresar el codigo'), 400);
-        }
-
-        if ($request->get('code') !== $usuario->code) {
-
-        return response()->json(compact('El codigo es incorrecto'), 400);
         }
     }
 

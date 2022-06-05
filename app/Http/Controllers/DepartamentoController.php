@@ -4,12 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Departamento;
+use Illuminate\Support\Facades\Hash;
 
 class DepartamentoController extends Controller
 {
     public function index()
     {
-        $departamento = Departamento::where('state', 1)->get(['id','name', 'state', 'created_at']);
+        $departamento = Departamento::where('state', 1)->get(['id', 'name', 'state', 'created_at']);
+
+        return response()->json(compact('departamento'), 200);
+    }
+
+    public function index_audit()
+    {
+        $departamento = Departamento::get(['id', 'name', 'state', 'created_at', 'updated_at', 'deleted_at', 'restored_at']);
 
         return response()->json(compact('departamento'), 200);
     }
@@ -23,7 +31,7 @@ class DepartamentoController extends Controller
 
     public function show($id)
     {
-        $departamento = Departamento::find($id);
+        $departamento = Departamento::where('id', $id)->with('tiene_usuarios','tiene_documentos','usuario_creador','usuario_modificador','usuario_eliminador','usuario_restaurador')->get(['id','name','state','user_created','user_updated','user_deleted','user_restored','created_at','updated_at','deleted_at','restored_at']);
 
         return response()->json(compact('departamento'), 200);
     }
@@ -110,21 +118,22 @@ class DepartamentoController extends Controller
     {
         $usuario = auth()->user();
 
-        if ($request->get('code') !== null && $request->get('code') == $usuario->code) {
-            $departamento = Departamento::find($id);
-            $departamento->delete();
+        if ($request->get('code') !== null) {
+            if (Hash::check($request->get('code'), $usuario->code)) {
 
-        return response()->json(compact('Eliminacion completa'), 200);
+                $departamento = Departamento::find($id);
+                $departamento->delete();
+
+                return response()->json(compact('Eliminacion completa'));
+            }
+            else{
+                return response()->json(compact('El codigo es incorrecto'), 400);
+            }
         }
 
         if ($request->get('code') == null) {
 
         return response()->json(compact('Necesita ingresar el codigo'), 400);
-        }
-
-        if ($request->get('code') !== $usuario->code) {
-
-        return response()->json(compact('El codigo es incorrecto'), 400);
         }
     }
 }

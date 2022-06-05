@@ -18,11 +18,11 @@ class UserPivoteProyecto extends Model
 
     public function pertenece_proyectos()
     {
-        return $this->belongsToMany(Proyecto::class, 'proyect_id');
+        return $this->hasMany(Proyecto::class, 'id', 'proyect_id');
     }
 
     public function pertenece_usuarios()
     {
-        return $this->belongsToMany(User::class, 'user_id');
+        return $this->hasMany(User::class, 'id', 'user_id');
     }
 }

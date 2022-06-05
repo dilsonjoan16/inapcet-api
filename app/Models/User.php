@@ -79,19 +79,24 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Departamento::class, 'departament_id');
     }
 
+    // public function tiene_proyectos()
+    // {
+    //     return $this->belongsTo(UserPivoteProyecto::class, 'id','user_id');   //TABLA PIVOTE
+    // }
+
     public function tiene_proyectos()
     {
-        return $this->hasMany(UserPivoteProyecto::class);   //TABLA PIVOTE
+        return $this->belongsToMany(Proyecto::class, 'user_pivote_proyectos', 'user_id', 'proyect_id');   //TABLA PIVOTE
     }
 
     public function tiene_usuarios()
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'id');
     }
 
     public function tiene_documentos()
     {
-        return $this->hasMany(Documento::class);
+        return $this->hasMany(Documento::class, 'id');
     }
 
     public function usuario_creador()
