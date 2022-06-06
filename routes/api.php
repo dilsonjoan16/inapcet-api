@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\DocumentosController;
+use App\Http\Controllers\MailController;
 use App\Http\Controllers\ProyectosController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -97,5 +98,9 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::put('proyectos/activar/masivo', [ProyectosController::class, 'restore_massive']);
     Route::post('proyectos/eliminado/forzado/{id}', [ProyectosController::class, 'force_delete']);
     Route::get('proyectos/auditoria', [ProyectosController::class, 'index_audit']);
+
+    // RUTAS PARA LOS ENVIOS DE CORREOS ELECTRONICOS
+    Route::post('recovery/password/user', [MailController:: class, 'passwordRecovery']);
+    Route::post('recovery/code/user', [MailController::class , 'codeRecovery']);
 
 });
