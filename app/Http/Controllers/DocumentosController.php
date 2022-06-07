@@ -78,6 +78,13 @@ class DocumentosController extends Controller
         // return Storage::response("archivos/$usuario->name/$file");
     }
 
+    public function show_proyect($id)
+    {
+        $documento = Documento::where('proyect_id', $id)->with('pertenece_departamento', 'pertenece_proyectos')->get(['id','name','state','created_at','departament_id', 'proyect_id']);
+
+        return response()->json(compact('documento'), 200);
+    }
+
     public function store(Request $request)
     {
         $usuario = auth()->user();

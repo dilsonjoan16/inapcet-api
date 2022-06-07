@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\DocumentosController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\ProyectosController;
 use App\Http\Controllers\RoleController;
@@ -63,6 +64,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     // Route::post('documentos/eliminado/forzado/{id}', [DocumentosController::class, 'force_delete']);
     Route::post('documentos/eliminado/permanente/{id}', [DocumentosController::class, 'force_delete']);
     Route::get('documentos/auditoria', [DocumentosController::class, 'index_audit']);
+    Route::get('documentos/ver/proyecto/{id}', [DocumentosController::class, 'show_proyect']);
 
     // RUTAS DE LOS ROLES
     Route::get('roles/activos', [RoleController::class, 'index']);
@@ -102,5 +104,14 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     // RUTAS PARA LOS ENVIOS DE CORREOS ELECTRONICOS
     Route::post('recovery/password/user', [MailController:: class, 'passwordRecovery']);
     Route::post('recovery/code/user', [MailController::class , 'codeRecovery']);
+
+    // RUTAS PARA LAS EXPORTACIONES EN EXCEL
+    Route::get('download/excel/auditoria/proyectos', [ExportController::class, 'exportProyects']);
+    Route::get('download/excel/auditoria/usuarios', [ExportController::class, 'exportUsers']);
+    Route::get('download/excel/auditoria/documentos', [ExportController::class, 'exportDocuments']);
+    Route::get('download/excel/auditoria/departamentos', [ExportController::class, 'exportDepartaments']);
+
+    // RUTAS PARA LAS EXPORTACIONES EN PDF
+    Route::get('download/pdf/proyecto/{id}', [ExportController::class, 'exportDataProyect']);
 
 });
