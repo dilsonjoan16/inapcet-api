@@ -113,6 +113,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|max:12|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|regex:/[@$!%*#?&]/',
             'code' => 'required|integer|digits:6',
+            'departament_id' => 'required|integer',
         ]);
 
         $user = new User;
@@ -121,6 +122,7 @@ class UserController extends Controller
         $user->password = Hash::make($request->get('password'));
         $user->code = Hash::make($request->get('code'));
         $user->rol_id = 3;
+        $user->departament_id = $request->get('departament_id');
         $user->state = 0;
         $user->save();
 

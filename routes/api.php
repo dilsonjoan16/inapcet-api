@@ -24,6 +24,14 @@ use Illuminate\Support\Facades\Route;
 Route::post('usuarios/register', [UserController::class, 'register']);
 Route::post('usuarios/login', [UserController::class, 'authenticate']);
 
+// RUTAS PARA LOS ENVIOS DE CORREOS ELECTRONICOS
+    Route::post('recovery/password/user', [MailController:: class, 'passwordRecovery']);
+    Route::post('recovery/code/user', [MailController::class , 'codeRecovery']);
+
+    // RUTA PARA OBTENER DEPARTAMENTOS EN EL REGISTER DE CUALQUIER USUARIO
+    Route::get('departamentos/activos/register', [DepartamentoController::class, 'index']);
+
+
 // RUTA PARA CREAR EL USUARIO MAESTRO
 // Route::post('usuarios/master/register', [UserController::class, 'master_store']);
 
@@ -100,10 +108,6 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::put('proyectos/activar/masivo', [ProyectosController::class, 'restore_massive']);
     Route::post('proyectos/eliminado/forzado/{id}', [ProyectosController::class, 'force_delete']);
     Route::get('proyectos/auditoria', [ProyectosController::class, 'index_audit']);
-
-    // RUTAS PARA LOS ENVIOS DE CORREOS ELECTRONICOS
-    Route::post('recovery/password/user', [MailController:: class, 'passwordRecovery']);
-    Route::post('recovery/code/user', [MailController::class , 'codeRecovery']);
 
     // RUTAS PARA LAS EXPORTACIONES EN EXCEL
     Route::get('download/excel/auditoria/proyectos', [ExportController::class, 'exportProyects']);

@@ -26,6 +26,7 @@
             border-bottom-right-radius: 25px;
             color: black !important;
             padding: 15px;
+            width: 100%;
         }
     </style>
 </head>
