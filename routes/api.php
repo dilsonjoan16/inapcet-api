@@ -94,7 +94,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('departamentos/desactivar/{id}', [DepartamentoController::class, 'soft_delete']);
     Route::get('departamentos/activar/{id}', [DepartamentoController::class, 'restore']);
     Route::put('departamentos/activar/masivo', [DepartamentoController::class, 'restore_massive']);
-    Route::post('departamentos/eliminado/forzado/{id}', [DepartamentoControler::class, 'force_delete']);
+    Route::post('departamentos/eliminado/forzado/{id}', [DepartamentoController::class, 'force_delete']);
     Route::get('departamentos/auditoria', [DepartamentoController::class, 'index_audit']);
 
     // RUTAS DE LOS PROYECTOS
