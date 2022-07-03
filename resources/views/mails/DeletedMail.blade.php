@@ -45,7 +45,7 @@
         <br>
         <p>
             Estimad@ {{$datos[0]}}. Se le informa que su estado en el Sistema fue modificado, pasando a ser un <strong>Usuario Inactivo</strong>.
-            <i> La activacion se llevo a cabo por: <strong>{{$datos[3]}}</strong></i>
+            <i> La desactivacion se llevo a cabo por: <strong>{{$datos[3]}}</strong></i>
             <br>
             <br>
             <strong>
