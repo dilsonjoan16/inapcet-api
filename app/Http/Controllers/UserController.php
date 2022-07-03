@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
-    use App\Models\User;
+use App\Mail\DeletedMail;
+use App\Mail\RegisterMail;
+use App\Mail\RestoredMail;
+use App\Models\Departamento;
+use App\Models\User;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Hash;
-    use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
     use JWTAuth;
     // use Tymon\JWTAuth\Facades\JWTAuth;
     use Tymon\JWTAuth\Exceptions\JWTException;
@@ -127,6 +132,16 @@ class UserController extends Controller
         $user->save();
 
         $token = JWTAuth::fromUser($user);
+
+        $departamento = Departamento::where('id', $user->departament_id)->first();
+
+        $datos = new RegisterMail([$user->name, $user->email, $departamento, $user->created_at]);
+
+        $gerente = User::where('rol_id', 2)->where('departament_id', $user->departament_id)->get('email');
+
+        foreach ($gerente as $g) {
+           Mail::to($g)->send($datos);
+        }
 
         return response()->json(compact('user','token'),201);
     }
@@ -256,6 +271,12 @@ class UserController extends Controller
         $user->state = 0;
         $user->update();
 
+        $datos = new DeletedMail([$user->name, $user->email, $user->restored_at, $usuario->name]);
+
+        // Mail::to($user->email)->send($datos);
+
+        Mail::to('dilsonjoan16@gmail.com')->send($datos);
+
         return response()->json(compact('user'), 200);
     }
     // FUNCION PARA RESTAURAR ELIMINADOS TEMPORALES A TRAVES DEL $ID
@@ -268,6 +289,12 @@ class UserController extends Controller
         $user->restored_at = date_create();
         $user->state = 1;
         $user->update();
+
+        $datos = new RestoredMail([$user->name, $user->email, $user->restored_at, $usuario->name]);
+
+        // Mail::to($user->email)->send($datos);
+
+        Mail::to('dilsonjoan16@gmail.com')->send($datos);
 
         return response()->json(compact('user'), 200);
     }
