@@ -103,7 +103,7 @@ class UserController extends Controller
 
         $usuarioAc = auth()->user();
 
-        $usuario = User::where('state', 1)->where('departament_id', $usuarioAc->departament_id)->get(['id','name']);
+        $usuario = User::where('state', 1)->where('departament_id', 2)->get(['id','name']);
 
             return response()->json(compact('usuario'), 200);
     }
