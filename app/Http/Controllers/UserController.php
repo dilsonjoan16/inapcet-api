@@ -97,6 +97,17 @@ class UserController extends Controller
 
     }
 
+    // FUNCION QUE TRAE LOS USUARIOS LISTOS PARA PROYECTOS
+
+    public function index_proyect_user() {
+
+        $usuarioAc = auth()->user();
+
+        $usuario = User::where('state', 1)->where('departament_id', $usuarioAc->departament_id)->get(['id','name']);
+
+            return response()->json(compact('usuario'), 200);
+    }
+
     public function show($id)
     {
         $usuario = User::with('pertenece_roles','pertecene_departamento')->find($id);
@@ -273,9 +284,9 @@ class UserController extends Controller
 
         $datos = new DeletedMail([$user->name, $user->email, $user->restored_at, $usuario->name]);
 
-        // Mail::to($user->email)->send($datos);
+        Mail::to($user->email)->send($datos);
 
-        Mail::to('dilsonjoan16@gmail.com')->send($datos);
+        // Mail::to('dilsonjoan16@gmail.com')->send($datos);
 
         return response()->json(compact('user'), 200);
     }

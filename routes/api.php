@@ -37,13 +37,13 @@ Route::post('usuarios/login', [UserController::class, 'authenticate']);
 
         // FUNCION PARA CREAR EL USUARIO MAESTRO
 Route::post('usuarios/register/professional', [UserController::class, 'register_pro']);
-
 Route::group(['middleware' => ['jwt.verify']], function() {
     /*AÑADE AQUI LAS RUTAS QUE QUIERAS PROTEGER CON JWT*/
 
     // RUTAS DE LOS USUARIO
     Route::post('usuarios/crear', [UserController::class, 'store']);
     Route::get('usuarios/activos', [UserController::class, 'index']);
+    Route::get('usuarios/activos/proyectos', [UserController::class, 'index_proyect_user']);
     Route::get('usuarios/inactivos', [UserController::class, 'index_trashed']);
     Route::get('usuarios/ver/{id}', [UserController::class, 'show']);
     Route::put('usuarios/modificar/{id}', [UserController::class, 'update']);
