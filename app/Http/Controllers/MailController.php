@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AnnounceMail;
 use App\Mail\CodeMail;
 use Illuminate\Http\Request;
 use App\Mail\RecoveryMail;
@@ -106,6 +107,44 @@ class MailController extends Controller
         if ($request->get('password') == null) {
 
         return response()->json('Necesita ingresar el password', 400);
+        }
+    }
+
+    public function anuncio(Request $request) {
+
+        $user = auth()->user();
+
+        $request->validate([
+            "title" => "required",
+            "body" => "required"
+        ]);
+
+        if ($request->get('code') !== null) {
+            if (Hash::check($request->get('code'), $user->code)) {
+
+                $datos = new AnnounceMail([$user->name, $request->get('title'), $request->get('body'), $user->email]);
+                //dd($datos);
+                set_time_limit(600);
+
+                foreach ($request->get('usuarios') as $u) {
+
+                    $person = User::find($u);
+
+                    Mail::to($person->email)->send($datos);
+                }
+                // Mail::to('dilsonjoan16@gmail.com')->send($datos);
+
+            return response()->json("Mensaje enviado con exito", 200);
+
+            }else{
+
+                return response()->json('El codigo es incorrecto', 400);
+            }
+        }
+
+        if ($request->get('code') == null) {
+
+        return response()->json('Necesita ingresar el codigo', 400);
         }
     }
 }

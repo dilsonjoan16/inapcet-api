@@ -118,4 +118,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     // RUTAS PARA LAS EXPORTACIONES EN PDF
     Route::get('download/pdf/proyecto/{id}', [ExportController::class, 'exportDataProyect']);
 
+    // RUTAS PARA EL ENVIO DE ANUNCIOS
+    Route::post('emails/anuncio', [MailController::class, 'anuncio']);
+
 });
